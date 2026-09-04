@@ -1,9 +1,8 @@
 # Existing UpCloud / cluster Cilium install (helm release: cilium @ kube-system).
-# Keep kube-proxy replacement + IPAM as currently deployed; only add Gateway API.
-# NOTE: "auto" is NOT resolved — it becomes hostname "auto" and breaks the operator.
-# Use the kubernetes Endpoint IP:port (kubectl get ep kubernetes).
-k8sServiceHost: "100.102.142.3"
-k8sServicePort: "6443"
+# k8sServiceHost must be a real DNS/IP (literal "auto" breaks the operator).
+# Prefer the cluster API load balancer from kubeconfig — survives control-plane IP moves.
+k8sServiceHost: "lb-0a825e4a4813414cbf97cfb7464ee1fc-1.upcloudlb.com"
+k8sServicePort: "7443"
 kubeProxyReplacement: true
 
 ipam:

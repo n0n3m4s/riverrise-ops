@@ -20,5 +20,8 @@ spec:
     # Policies target multiple NS via metadata.namespace in templates.
     namespace: default
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - ServerSideApply=true

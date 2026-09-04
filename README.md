@@ -48,11 +48,14 @@ kubectl apply -n argocd -f bootstrap/root-application-prod.yaml
 | **-10** | `AppProject` |
 | **-5** | Sealed Secrets key + Cilium (`gatewayAPI`) |
 | **-4** | Sealed Secrets controller |
+| **-2** | `secrets` (SealedSecrets з `environments/prod/secrets`) |
 | **-1** | NetworkPolicies — **вимкнено** (`*.yaml.disabled`) |
 | **0** | Cilium Gateway |
 | **1** | Redis, RabbitMQ |
 | **2** | Monitoring |
 | **3** | Services (api, frontend, admin) |
+
+Усі дочірні Applications мають `syncPolicy.automated` — після `kubectl apply` bootstrap синкаються самі.
 
 ## AppProject ↔ apps/
 
