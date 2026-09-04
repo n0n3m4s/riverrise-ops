@@ -5,7 +5,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/n0n3m4s/riverrise_back_end
   pullPolicy: IfNotPresent
-  tag: 7cc3a87
+  tag: 1485b34
 
 imagePullSecrets:
   - name: ghcr-pull
