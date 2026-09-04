@@ -1,24 +1,24 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: network-policies
+  name: cilium-gateway
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   project: infra
   source:
     repoURL: git@github.com:n0n3m4s/riverrise-ops.git
     targetRevision: main
-    path: gitops/charts/network-policies
+    path: charts/wrappers/cilium-gateway
     helm:
-      releaseName: network-policies
+      releaseName: cilium-gateway
       valueFiles:
-        - ../../environments/prod/values/network-policies.yaml
+        - ../../../environments/prod/values/cilium-gateway.yaml
   destination:
     server: https://kubernetes.default.svc
-    # Policies target multiple NS via metadata.namespace in templates.
-    namespace: default
+    namespace: gateway
   syncPolicy:
     syncOptions:
+      - CreateNamespace=true
       - ServerSideApply=true

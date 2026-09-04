@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: git@github.com:n0n3m4s/riverrise-ops.git
     targetRevision: main
-    path: gitops/charts/wrappers/redis
+    path: charts/wrappers/redis
     helm:
       releaseName: redis
       valueFiles:

@@ -1,23 +1,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: frontend
+  name: monitoring
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
-  project: services
+  project: observability
   source:
     repoURL: git@github.com:n0n3m4s/riverrise-ops.git
     targetRevision: main
-    path: gitops/charts/basic-chart
+    path: charts/wrappers/monitoring
     helm:
-      releaseName: frontend
+      releaseName: monitoring
       valueFiles:
-        - ../../environments/prod/values/services/frontend.yaml
+        - ../../../environments/prod/values/monitoring.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: monitoring
   syncPolicy:
     syncOptions:
       - CreateNamespace=true

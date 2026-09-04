@@ -1,5 +1,5 @@
 # Bootstrap для кластера PROD.
-#   kubectl apply -n argocd -f gitops/bootstrap/root-application-prod.yaml
+#   kubectl apply -n argocd -f bootstrap/root-application-prod.yaml
 #
 # Root синкає: projects + apps/prod/** + environments/prod/secrets/**
 
@@ -15,7 +15,7 @@ spec:
   source:
     repoURL: git@github.com:n0n3m4s/riverrise-ops.git
     targetRevision: main
-    path: gitops
+    path: .
     directory:
       recurse: true
       include: '{projects/**/*.yaml,apps/prod/**/*.yaml,environments/prod/secrets/**/*.yaml}'
