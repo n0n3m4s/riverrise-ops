@@ -10,8 +10,9 @@
 ├── projects/            # AppProject (політики Argo CD)
 ├── apps/prod/           # Application (infra / databases / observability / services)
 ├── environments/prod/
+│   ├── namespaces/      # Namespace (root синкає першими, wave -11)
 │   ├── values/          # Helm valueFiles (root їх НЕ синкає як ресурси)
-│   └── secrets/         # SealedSecret для sync
+│   └── secrets/         # SealedSecret — Application `secrets`
 └── charts/
     ├── basic-chart/       # Спільний Helm для продуктових сервісів
     ├── network-policies/  # NetworkPolicy (зараз Application disabled)
@@ -20,9 +21,10 @@
 
 | Каталог | Що це | Чи синкає root |
 |---------|--------|----------------|
+| `environments/prod/namespaces/` | `Namespace` | так |
 | `projects/` | `AppProject` | так |
 | `apps/prod/…` | `Application` | так |
-| `environments/prod/secrets/` | SealedSecret | так |
+| `environments/prod/secrets/` | SealedSecret | **ні** (Application `secrets`) |
 | `environments/prod/values/` | Helm values | **ні** (лише `helm.valueFiles`) |
 | `charts/` | Helm charts | **ні** |
 | `bootstrap/` | Root Application | вручну `kubectl apply` |
@@ -45,6 +47,7 @@ kubectl apply -n argocd -f bootstrap/root-application-prod.yaml
 
 | Wave | Що |
 |------|----|
+| **-11** | Namespaces (`databases`, `monitoring`, `gateway`, `sealed-secrets`) |
 | **-10** | `AppProject` |
 | **-5** | Sealed Secrets key + Cilium (`gatewayAPI`) |
 | **-4** | Sealed Secrets controller |

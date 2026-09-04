@@ -1,8 +1,8 @@
 # Bootstrap для кластера PROD.
 #   kubectl apply -n argocd -f bootstrap/root-application-prod.yaml
 #
-# Root синкає: projects + apps/prod/**
-# SealedSecrets — Application prod-secrets (після sealed-secrets controller).
+# Root синкає: namespaces + projects + apps/prod/**
+# SealedSecrets — Application secrets (після sealed-secrets controller).
 
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -19,7 +19,7 @@ spec:
     path: .
     directory:
       recurse: true
-      include: '{projects/*.yaml,apps/prod/**/*.yaml}'
+      include: '{environments/prod/namespaces/*.yaml,projects/*.yaml,apps/prod/**/*.yaml}'
       exclude: '{**/*.example.yaml,**/*.yaml.example,**/examples/**,**/*.yaml.disabled}'
   destination:
     server: https://kubernetes.default.svc
