@@ -18,7 +18,7 @@ spec:
     path: .
     directory:
       recurse: true
-      include: '{projects/**/*.yaml,apps/prod/**/*.yaml,environments/prod/secrets/**/*.yaml}'
+      include: '{projects/*.yaml,apps/prod/**/*.yaml,environments/prod/secrets/*.yaml}'
       exclude: '{**/*.example.yaml,**/*.yaml.example,**/examples/**}'
   destination:
     server: https://kubernetes.default.svc
