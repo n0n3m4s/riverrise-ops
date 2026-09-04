@@ -1,0 +1,8 @@
+apiVersion: v2
+name: network-policies
+description: >-
+  Central NetworkPolicy (+ Cilium toFQDNs) for riverrise namespaces
+  (default, databases, kube-system/cilium-envoy, sealed-secrets, monitoring).
+type: application
+version: 0.1.1
+appVersion: "1.0.0"

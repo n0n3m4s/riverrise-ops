@@ -1,0 +1,23 @@
+# RabbitMQ (CloudPirates). Auth via existing Secret when deployed.
+# NetworkPolicies: charts/network-policies (NS databases) — currently disabled in Argo.
+rabbitmq:
+  auth:
+    enabled: true
+    username: admin
+    existingSecret: rabbitmq-auth
+    existingPasswordKey: password
+    existingErlangCookieKey: erlang-cookie
+  persistence:
+    enabled: true
+    size: 8Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  service:
+    type: ClusterIP
+    amqpPort: 5672
+    managementPort: 15672

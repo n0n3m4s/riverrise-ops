@@ -1,0 +1,15 @@
+{{- if .Values.lb.enabled }}
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: {{ required "lb.poolName is required when lb.enabled" .Values.lb.poolName | quote }}
+  labels:
+    app.kubernetes.io/name: cilium-gateway
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+spec:
+  blocks:
+    {{- toYaml .Values.lb.cidrs | nindent 4 }}
+  serviceSelector:
+    matchLabels:
+      io.cilium.gateway/owning-gateway: {{ .Values.gateway.name | quote }}
+{{- end }}

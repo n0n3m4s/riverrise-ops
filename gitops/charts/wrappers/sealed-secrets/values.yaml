@@ -1,0 +1,32 @@
+# Controller only. Sealing keypair (tls.crt + tls.key) MUST already exist as Secret
+# sealed-secrets-key in this namespace (brought from the secrets Git repo).
+#
+# Disable automatic key rotation so the external keypair stays the source of truth.
+# NetworkPolicies: charts/network-policies
+sealed-secrets:
+  fullnameOverride: sealed-secrets-controller
+  namespace: sealed-secrets
+
+  createController: true
+  secretName: sealed-secrets-key
+
+  # Do not rotate / generate a new active key on a schedule
+  keyrenewperiod: "0"
+
+  networkPolicy:
+    enabled: false
+
+  rbac:
+    create: true
+    clusterRole: true
+
+  serviceAccount:
+    create: true
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi

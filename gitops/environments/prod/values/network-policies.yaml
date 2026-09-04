@@ -1,0 +1,250 @@
+# Prod NetworkPolicies — каталог `workloads`
+#
+# Запис БЕЗ ingress/egress → лише ціль (dns, internet, kubeApi, upcloud-postgres, …).
+# Запис З ingress/egress → NetworkPolicy (+ CiliumNetworkPolicy для toFQDNs).
+#
+# toFQDNs — лише через Cilium (hostname у networking.k8s.io/NetworkPolicy не підтримується).
+
+workloads:
+
+  # --- reference-only ---
+
+  dns:
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: kube-system
+    ports:
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
+
+  # This cluster Service CIDR (kubernetes ClusterIP = 10.96.0.1).
+  kubeApi:
+    ipBlock:
+      cidr: 10.96.0.0/16
+    ports:
+      - protocol: TCP
+        port: 443
+
+  internet:
+    ipBlock:
+      cidr: 0.0.0.0/0
+      except:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+
+  internet6:
+    ipBlock:
+      cidr: ::/0
+      except:
+        - fc00::/7
+
+  # UpCloud Managed PostgreSQL (hostname → CiliumNetworkPolicy toFQDNs).
+  upcloud-postgres:
+    toFQDNs:
+      - matchName: nl-ams1-postgresql-yibccqeahcip.db.upclouddatabases.com
+    ports:
+      - protocol: TCP
+        port: 11569
+
+  # --- services (default) ---
+
+  api:
+    namespace: default
+    selector:
+      app.kubernetes.io/name: api
+      app.kubernetes.io/instance: api
+    ports:
+      - protocol: TCP
+        port: 4402
+    policyTypes: [Ingress, Egress]
+    ingress:
+      - cilium-envoy
+      - monitoring-mesh
+      - frontend
+      - admin
+      - notification-api
+      - promo-bot
+    egress:
+      - dns
+      - upcloud-postgres
+      - redis
+      - rabbitmq
+      - internet
+      - internet6
+
+  frontend:
+    namespace: default
+    selector:
+      app.kubernetes.io/name: frontend
+      app.kubernetes.io/instance: frontend
+    ports:
+      - protocol: TCP
+        port: 4401
+    policyTypes: [Ingress, Egress]
+    ingress:
+      - cilium-envoy
+      - monitoring-mesh
+    egress:
+      - dns
+      - redis
+      - internet
+      - internet6
+      - api
+
+  admin:
+    namespace: default
+    selector:
+      app.kubernetes.io/name: admin
+      app.kubernetes.io/instance: admin
+    ports:
+      - protocol: TCP
+        port: 3006
+    policyTypes: [Ingress, Egress]
+    ingress:
+      - cilium-envoy
+      - monitoring-mesh
+    egress:
+      - dns
+      - redis
+      - internet
+      - internet6
+      - api
+
+  notification-api:
+    namespace: default
+    selector:
+      app.kubernetes.io/name: notification-api
+      app.kubernetes.io/instance: notification-api
+    ports:
+      - protocol: TCP
+        port: 8080
+    policyTypes: [Ingress, Egress]
+    ingress:
+      - cilium-envoy
+      - monitoring-mesh
+      - api
+    egress:
+      - dns
+      - redis
+      - internet
+      - internet6
+      - api
+
+  promo-bot:
+    namespace: default
+    selector:
+      app.kubernetes.io/name: promo-bot
+      app.kubernetes.io/instance: promo-bot
+    ports:
+      - protocol: TCP
+        port: 8080
+    policyTypes: [Ingress, Egress]
+    ingress:
+      - monitoring-mesh
+      - api
+    egress:
+      - dns
+      - redis
+      - internet
+      - internet6
+      - api
+
+  # --- databases (NS databases) ---
+
+  redis:
+    namespace: databases
+    name: redis
+    selector:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/instance: redis
+    ports:
+      - protocol: TCP
+        port: 6379
+    policyTypes: [Ingress, Egress]
+    ingress:
+      - api
+      - frontend
+      - admin
+      - notification-api
+      - promo-bot
+      - monitoring-mesh
+    egress:
+      - dns
+
+  rabbitmq:
+    namespace: databases
+    name: rabbitmq
+    selector:
+      app.kubernetes.io/name: rabbitmq
+      app.kubernetes.io/instance: rabbitmq
+    ports:
+      - protocol: TCP
+        port: 5672
+      - protocol: TCP
+        port: 15672
+    policyTypes: [Ingress, Egress]
+    ingress:
+      - api
+      - monitoring-mesh
+    egress:
+      - dns
+
+  # --- infra ---
+
+  cilium-envoy:
+    namespace: kube-system
+    selector:
+      app.kubernetes.io/name: cilium-envoy
+    policyTypes: [Ingress, Egress]
+    ingress:
+      - any
+    egress:
+      - dns
+      - kubeApi
+      - api
+      - frontend
+      - admin
+      - notification-api
+      - promo-bot
+
+  sealed-secrets-controller:
+    namespace: sealed-secrets
+    selector:
+      app.kubernetes.io/name: sealed-secrets
+      app.kubernetes.io/instance: sealed-secrets
+    ports:
+      - protocol: TCP
+        port: 8080
+      - protocol: TCP
+        port: 8081
+    policyTypes: [Ingress, Egress]
+    ingress:
+      - any
+    egress:
+      - dns
+      - kubeApi
+
+  # --- monitoring ---
+
+  monitoring-mesh:
+    namespace: monitoring
+    name: monitoring-mesh
+    selector: {}
+    mesh: true
+    policyTypes: [Ingress, Egress]
+    ingress:
+      - cilium-envoy
+    egress:
+      - dns
+      - kubeApi
+      - api
+      - frontend
+      - admin
+      - notification-api
+      - promo-bot
+      - redis
+      - rabbitmq
+      - cilium-envoy

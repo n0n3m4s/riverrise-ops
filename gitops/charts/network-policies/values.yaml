@@ -1,0 +1,8 @@
+# workloads — reference-only (немає ingress/egress) або policy (є ingress/egress)
+#
+# ports = порти апки (listen) або цільові порти для egress-референсів
+# mesh: true = all pods in own NS, no port filter
+# policyTypes default [Ingress, Egress]; ingress: [] = deny all ingress
+# toFQDNs: [...] — лише CiliumNetworkPolicy (hostname); не змішуй з ipBlock без потреби
+
+workloads: {}

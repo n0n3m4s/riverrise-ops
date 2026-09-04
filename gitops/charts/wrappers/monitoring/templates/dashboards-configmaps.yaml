@@ -1,0 +1,23 @@
+{{- /*
+  Provision Grafana dashboards from dashboards/<Folder>/*.json
+  Sidecar picks them via label grafana_dashboard + annotation grafana_folder.
+*/ -}}
+{{- range $path, $_ := .Files.Glob "dashboards/**/*.json" }}
+{{- $parts := splitList "/" $path }}
+{{- $folder := index $parts 1 }}
+{{- $basename := index $parts 2 }}
+{{- $name := trimSuffix ".json" $basename }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "grafana-dash-%s-%s" ($folder | lower) ($name | trunc 40 | lower | replace "_" "-") | trunc 63 | trimSuffix "-" }}
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/part-of: monitoring
+  annotations:
+    grafana_folder: {{ $folder | quote }}
+data:
+  {{ $basename }}: |-
+{{ $.Files.Get $path | nindent 4 }}
+{{- end }}

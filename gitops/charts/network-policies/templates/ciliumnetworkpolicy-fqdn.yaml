@@ -1,0 +1,45 @@
+{{- /*
+CiliumNetworkPolicy for egress toFQDNs peers (K8s NetworkPolicy cannot match hostnames).
+*/ -}}
+{{- range $name, $w := .Values.workloads }}
+{{- if hasKey $w "egress" }}
+{{- $namespace := $w.namespace | default "default" }}
+{{- $fqdnRules := list }}
+{{- range $ref := $w.egress }}
+  {{- if and (ne $ref "any") (ne $ref "mesh") }}
+    {{- $isFQDN := include "network-policies.isFQDNPeer" (dict "root" $ "ref" $ref) }}
+    {{- if eq $isFQDN "true" }}
+      {{- $tw := index $.Values.workloads $ref }}
+      {{- $rule := dict "toFQDNs" $tw.toFQDNs }}
+      {{- $ports := $tw.ports | default list }}
+      {{- if gt (len $ports) 0 }}
+        {{- $toPorts := list }}
+        {{- range $ports }}
+          {{- $toPorts = append $toPorts (dict "ports" (list (dict "port" (printf "%v" .port) "protocol" (.protocol | default "TCP")))) }}
+        {{- end }}
+        {{- $_ := set $rule "toPorts" $toPorts }}
+      {{- end }}
+      {{- $fqdnRules = append $fqdnRules $rule }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- if gt (len $fqdnRules) 0 }}
+{{- $endpointSelector := fromJson (include "network-policies.podSelectorJSON" (dict "root" $ "name" $name)) }}
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: {{ printf "%s-fqdn" ($w.name | default $name) | quote }}
+  namespace: {{ $namespace | quote }}
+  labels:
+    app.kubernetes.io/name: network-policies
+    app.kubernetes.io/instance: {{ $.Release.Name | quote }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service | quote }}
+spec:
+  endpointSelector:
+    {{- toYaml $endpointSelector | nindent 4 }}
+  egress:
+    {{- toYaml $fqdnRules | nindent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,29 @@
+# Bootstrap для кластера PROD.
+#   kubectl apply -n argocd -f gitops/bootstrap/root-application-prod.yaml
+#
+# Root синкає: projects + apps/prod/** + environments/prod/secrets/**
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:n0n3m4s/riverrise-ops.git
+    targetRevision: main
+    path: gitops
+    directory:
+      recurse: true
+      include: '{projects/**/*.yaml,apps/prod/**/*.yaml,environments/prod/secrets/**/*.yaml}'
+      exclude: '{**/*.example.yaml,**/*.yaml.example,**/examples/**}'
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

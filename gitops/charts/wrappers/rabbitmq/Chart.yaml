@@ -1,0 +1,11 @@
+apiVersion: v2
+name: rabbitmq
+description: RabbitMQ message broker (CloudPirates)
+type: application
+version: 0.1.0
+appVersion: "0.21.22"
+
+dependencies:
+  - name: rabbitmq
+    version: 0.21.22
+    repository: oci://registry-1.docker.io/cloudpirates

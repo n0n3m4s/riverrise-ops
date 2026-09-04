@@ -1,0 +1,70 @@
+nameOverride: frontend
+fullnameOverride: frontend
+replicaCount: 1
+
+image:
+  repository: ghcr.io/n0n3m4s/frontend
+  pullPolicy: IfNotPresent
+  tag: latest
+
+imagePullSecrets:
+  - name: ghcr-pull
+
+service:
+  type: ClusterIP
+  port: 4401
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+livenessProbe:
+  httpGet:
+    path: /api/healthcheck
+    port: http
+readinessProbe:
+  httpGet:
+    path: /api/healthcheck
+    port: http
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+      selectPolicy: Min
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+      selectPolicy: Max
+
+# Host(riverrise.net) catch-all / — /api перехоплює api-from-front (longest path match).
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: cilium
+      namespace: gateway
+      sectionName: web
+  routes:
+    - name: frontend
+      hostnames:
+        - riverrise.net
+      rules:
+        - matches:
+            - path:
+                type: PathPrefix
+                value: /

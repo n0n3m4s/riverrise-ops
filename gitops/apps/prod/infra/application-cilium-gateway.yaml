@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cilium-gateway
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: infra
+  source:
+    repoURL: git@github.com:n0n3m4s/riverrise-ops.git
+    targetRevision: main
+    path: gitops/charts/wrappers/cilium-gateway
+    helm:
+      releaseName: cilium-gateway
+      valueFiles:
+        - ../../../environments/prod/values/cilium-gateway.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gateway
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

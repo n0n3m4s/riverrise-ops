@@ -1,0 +1,45 @@
+{{- if .Values.httpRoute.enabled }}
+{{- $fullName := include "basic-chart.fullname" . -}}
+{{- $svcPort := .Values.service.port -}}
+{{- $parentRefs := .Values.httpRoute.parentRefs -}}
+{{- $annotations := .Values.httpRoute.annotations | default dict -}}
+{{- $routes := .Values.httpRoute.routes | default list -}}
+{{- if eq (len $routes) 0 }}
+{{- $routes = list (dict "name" $fullName "hostnames" .Values.httpRoute.hostnames "rules" .Values.httpRoute.rules) -}}
+{{- end }}
+{{- range $routes }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ required "httpRoute.routes[].name is required" .name }}
+  labels:
+    {{- include "basic-chart.labels" $ | nindent 4 }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- toYaml $parentRefs | nindent 4 }}
+  {{- with .hostnames }}
+  hostnames:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- range .rules }}
+    - {{- with .matches }}
+      matches:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .filters }}
+      filters:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      backendRefs:
+        - name: {{ $fullName }}
+          port: {{ $svcPort }}
+          weight: 1
+    {{- end }}
+{{- end }}
+{{- end }}

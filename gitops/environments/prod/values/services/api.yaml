@@ -1,0 +1,81 @@
+nameOverride: api
+fullnameOverride: api
+replicaCount: 1
+
+image:
+  repository: ghcr.io/n0n3m4s/riverrise_back_end
+  pullPolicy: IfNotPresent
+  tag: fbf8acc
+
+imagePullSecrets:
+  - name: ghcr-pull
+
+service:
+  type: ClusterIP
+  port: 4402
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+      selectPolicy: Min
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+      selectPolicy: Max
+
+# Demo/prod env from SealedSecret `api` (environments/prod/secrets/api.sealed.yaml)
+envFrom:
+  - secretRef:
+      name: api
+
+# Host(riverrise.net) && PathPrefix(/api) → api (Cilium Gateway), strip /api → /
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: cilium
+      namespace: gateway
+      sectionName: web
+  routes:
+    - name: api-from-front
+      hostnames:
+        - riverrise.net
+      rules:
+        - matches:
+            - path:
+                type: PathPrefix
+                value: /api
+          filters:
+            - type: URLRewrite
+              urlRewrite:
+                path:
+                  type: ReplacePrefixMatch
+                  replacePrefixMatch: /

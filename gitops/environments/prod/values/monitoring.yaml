@@ -1,0 +1,95 @@
+# Prod overrides for monitoring stack.
+# Grafana admin: Secret grafana-admin у NS monitoring
+kps:
+  grafana:
+    admin:
+      existingSecret: grafana-admin
+      userKey: admin-user
+      passwordKey: admin-password
+    service:
+      type: ClusterIP
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 300m
+        memory: 512Mi
+
+  prometheus:
+    prometheusSpec:
+      retention: 15d
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          cpu: 500m
+          memory: 2Gi
+
+  alertmanager:
+    alertmanagerSpec:
+      resources:
+        requests:
+          cpu: 30m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+
+  kube-state-metrics:
+    resources:
+      requests:
+        cpu: 30m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
+  prometheus-node-exporter:
+    resources:
+      requests:
+        cpu: 20m
+        memory: 16Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+
+  prometheusOperator:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+loki:
+  singleBinary:
+    persistence:
+      size: 20Gi
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 300m
+        memory: 512Mi
+  gateway:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits:
+        cpu: 50m
+        memory: 64Mi
+
+alloy:
+  alloy:
+    resources:
+      requests:
+        cpu: 30m
+        memory: 32Mi
+      limits:
+        cpu: 150m
+        memory: 128Mi

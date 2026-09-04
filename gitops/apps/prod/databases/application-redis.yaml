@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: redis
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: databases
+  source:
+    repoURL: git@github.com:n0n3m4s/riverrise-ops.git
+    targetRevision: main
+    path: gitops/charts/wrappers/redis
+    helm:
+      releaseName: redis
+      valueFiles:
+        - ../../../environments/prod/values/redis.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: databases
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

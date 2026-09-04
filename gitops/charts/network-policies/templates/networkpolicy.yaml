@@ -1,0 +1,81 @@
+{{- /*
+Build NetworkPolicy as dict → toYaml.
+workloads with ingress and/or egress → policy; others are reference-only.
+Egress refs with toFQDNs (no ipBlock) are handled by ciliumnetworkpolicy-fqdn.yaml.
+*/ -}}
+{{- range $name, $w := .Values.workloads }}
+{{- if or (hasKey $w "ingress") (hasKey $w "egress") }}
+{{- $namespace := $w.namespace | default "default" }}
+{{- $mesh := $w.mesh | default false }}
+{{- $policyTypes := $w.policyTypes | default (list "Ingress" "Egress") }}
+{{- $ingressRefs := $w.ingress | default list }}
+{{- $egressRefs := $w.egress | default list }}
+{{- $podSelector := fromJson (include "network-policies.podSelectorJSON" (dict "root" $ "name" $name)) }}
+{{- $listenPorts := $w.ports | default list }}
+
+{{- $fromPeers := list }}
+{{- range $ingressRefs }}
+  {{- if and (ne . "any") (ne . "mesh") }}
+    {{- $fromPeers = append $fromPeers . }}
+  {{- end }}
+{{- end }}
+
+{{- $ingressRules := list }}
+{{- if $mesh }}
+  {{- $ingressRules = append $ingressRules (dict "from" (list (dict "podSelector" (dict)))) }}
+{{- end }}
+{{- if has "any" $ingressRefs }}
+  {{- if gt (len $listenPorts) 0 }}
+    {{- $ingressRules = append $ingressRules (dict "ports" $listenPorts) }}
+  {{- else }}
+    {{- $ingressRules = append $ingressRules (dict) }}
+  {{- end }}
+{{- end }}
+{{- if gt (len $fromPeers) 0 }}
+  {{- $fromList := list }}
+  {{- range $fromPeers }}
+    {{- $fromList = append $fromList (fromJson (include "network-policies.peerJSON" (dict "root" $ "ref" . "policyNamespace" $namespace))) }}
+  {{- end }}
+  {{- $rule := dict "from" $fromList }}
+  {{- if gt (len $listenPorts) 0 }}
+    {{- $_ := set $rule "ports" $listenPorts }}
+  {{- end }}
+  {{- $ingressRules = append $ingressRules $rule }}
+{{- end }}
+
+{{- $egressRules := list }}
+{{- if $mesh }}
+  {{- $egressRules = append $egressRules (dict "to" (list (dict "podSelector" (dict)))) }}
+{{- end }}
+
+{{- range $egressRefs }}
+  {{- if and (ne . "any") (ne . "mesh") }}
+    {{- $isFQDN := include "network-policies.isFQDNPeer" (dict "root" $ "ref" .) }}
+    {{- if ne $isFQDN "true" }}
+      {{- $peer := fromJson (include "network-policies.peerJSON" (dict "root" $ "ref" . "policyNamespace" $namespace)) }}
+      {{- $rule := dict "to" (list $peer) }}
+      {{- $tw := index $.Values.workloads . }}
+      {{- $targetPorts := $tw.ports | default list }}
+      {{- if gt (len $targetPorts) 0 }}
+        {{- $_ := set $rule "ports" $targetPorts }}
+      {{- end }}
+      {{- $egressRules = append $egressRules $rule }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- $spec := dict "podSelector" $podSelector "policyTypes" $policyTypes }}
+{{- if has "Ingress" $policyTypes }}
+  {{- $_ := set $spec "ingress" $ingressRules }}
+{{- end }}
+{{- if has "Egress" $policyTypes }}
+  {{- $_ := set $spec "egress" $egressRules }}
+{{- end }}
+
+{{- $labels := dict "app.kubernetes.io/name" "network-policies" "app.kubernetes.io/instance" $.Release.Name "app.kubernetes.io/managed-by" $.Release.Service }}
+{{- $meta := dict "name" ($w.name | default $name) "namespace" $namespace "labels" $labels }}
+{{- $doc := dict "apiVersion" "networking.k8s.io/v1" "kind" "NetworkPolicy" "metadata" $meta "spec" $spec }}
+---
+{{ toYaml $doc }}
+{{- end }}
+{{- end }}

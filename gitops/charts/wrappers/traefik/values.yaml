@@ -1,0 +1,71 @@
+# Traefik with Kubernetes Gateway API (аналог Swarm labels: Host + entrypoints http/https).
+# NetworkPolicies: charts/network-policies
+traefik:
+  # Stable selector label (default would be release-namespace → traefik-traefik).
+  instanceLabelOverride: traefik
+
+  providers:
+    kubernetesGateway:
+      enabled: true
+    kubernetesCRD:
+      enabled: true
+    kubernetesIngress:
+      enabled: false
+
+  gateway:
+    enabled: true
+    name: traefik
+    listeners:
+      web:
+        port: 8000
+        protocol: HTTP
+        namespacePolicy:
+          from: All
+      # Увімкни, коли буде TLS Secret / cert-manager:
+      # websecure:
+      #   port: 8443
+      #   protocol: HTTPS
+      #   namespacePolicy:
+      #     from: All
+      #   mode: Terminate
+      #   certificateRefs:
+      #     - kind: Secret
+      #       name: REPLACE_ME-wildcard-tls
+
+  gatewayClass:
+    enabled: true
+    name: traefik
+
+  ports:
+    web:
+      port: 8000
+      exposedPort: 80
+      expose:
+        default: true
+      protocol: TCP
+    websecure:
+      port: 8443
+      exposedPort: 443
+      expose:
+        default: true
+      protocol: TCP
+
+  service:
+    type: LoadBalancer
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  ingressRoute:
+    dashboard:
+      enabled: false
+
+  log:
+    level: INFO
+  accessLog:
+    enabled: true

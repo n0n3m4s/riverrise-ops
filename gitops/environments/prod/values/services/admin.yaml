@@ -1,0 +1,70 @@
+nameOverride: admin
+fullnameOverride: admin
+replicaCount: 1
+
+image:
+  repository: ghcr.io/n0n3m4s/admin
+  pullPolicy: IfNotPresent
+  tag: latest
+
+imagePullSecrets:
+  - name: ghcr-pull
+
+service:
+  type: ClusterIP
+  port: 3006
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+livenessProbe:
+  httpGet:
+    path: /health.json
+    port: http
+readinessProbe:
+  httpGet:
+    path: /health.json
+    port: http
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+      selectPolicy: Min
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+      selectPolicy: Max
+
+# Host(admin.riverrise.net) → admin
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: cilium
+      namespace: gateway
+      sectionName: web
+  routes:
+    - name: admin
+      hostnames:
+        - admin.riverrise.net
+      rules:
+        - matches:
+            - path:
+                type: PathPrefix
+                value: /

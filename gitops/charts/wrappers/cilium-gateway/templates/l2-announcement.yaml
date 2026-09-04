@@ -1,0 +1,19 @@
+{{- if and .Values.lb.enabled .Values.lb.l2Announcement.enabled }}
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: {{ printf "%s-l2" .Values.lb.poolName | quote }}
+  labels:
+    app.kubernetes.io/name: cilium-gateway
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+spec:
+  {{- with .Values.lb.l2Announcement.interfaces }}
+  interfaces:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  externalIPs: {{ .Values.lb.l2Announcement.externalIPs | default true }}
+  loadBalancerIPs: {{ .Values.lb.l2Announcement.loadBalancerIPs | default true }}
+  serviceSelector:
+    matchLabels:
+      io.cilium.gateway/owning-gateway: {{ .Values.gateway.name | quote }}
+{{- end }}

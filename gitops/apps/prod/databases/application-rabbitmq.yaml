@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rabbitmq
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: databases
+  source:
+    repoURL: git@github.com:n0n3m4s/riverrise-ops.git
+    targetRevision: main
+    path: gitops/charts/wrappers/rabbitmq
+    helm:
+      releaseName: rabbitmq
+      valueFiles:
+        - ../../../environments/prod/values/rabbitmq.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: databases
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
