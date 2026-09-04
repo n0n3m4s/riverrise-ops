@@ -55,7 +55,7 @@ kubectl apply -n argocd -f bootstrap/root-application-prod.yaml
 | **-1** | NetworkPolicies — **вимкнено** (`*.yaml.disabled`) |
 | **0** | Cilium Gateway |
 | **1** | Redis, RabbitMQ |
-| **2** | Monitoring |
+| **2** | Monitoring — **вимкнено** (`*.yaml.disabled`) |
 | **3** | Services (api, frontend, admin) |
 
 Усі дочірні Applications мають `syncPolicy.automated` — після `kubectl apply` bootstrap синкаються самі.
