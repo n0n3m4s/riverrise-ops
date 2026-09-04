@@ -12,7 +12,7 @@ imagePullSecrets:
 
 service:
   type: ClusterIP
-  port: 4402
+  port: 3000
 
 resources:
   requests:
@@ -52,7 +52,142 @@ autoscaling:
           periodSeconds: 15
       selectPolicy: Max
 
-# Demo/prod env from SealedSecret `api` (environments/prod/secrets/api.sealed.yaml)
+# Non-secret config. Secrets via envFrom → SealedSecret `api` (не чіпаємо).
+env:
+  - name: ENV_TYPE
+    value: production
+  - name: PORT
+    value: "3000"
+  - name: RATE_LIMIT_ENABLED
+    value: "false"
+  - name: API_URL
+    value: https://riverrise.net/api
+  - name: FE_APP_URL
+    value: "*"
+  - name: CHANGE_COOLDOWN_ENABLED
+    value: "false"
+  - name: JWT_ACCESS_EXPIRES_IN
+    value: 15m
+  - name: JWT_ADMIN_ACCESS_EXPIRES_IN
+    value: 12h
+  - name: PG_DB_MAX_POOL_SIZE
+    value: "20"
+  - name: POSTGRES_DB
+    value: riverrise
+  - name: POSTGRES_USER
+    value: riverrise
+  - name: REDIS_TLS_ENABLED
+    value: "false"
+  - name: REDIS_ENABLED
+    value: "true"
+  - name: RABBITMQ_ENABLED
+    value: "true"
+  - name: RABBITMQ_EXCHANGE
+    value: riverrise.domain.v1
+  - name: WORKER
+    value: "true"
+  - name: WORKER_TYPE
+    value: general
+  - name: AUTH_ACCESS_COOKIE_NAME
+    value: rr_access
+  - name: AUTH_REFRESH_COOKIE_NAME
+    value: rr_refresh
+  - name: WALLET_NONCE_EXPIRES_IN_SECONDS
+    value: "300"
+  - name: XENFORO_ENABLED
+    value: "false"
+  - name: XENFORO_API_URL
+    value: https://community.riverrise.net/
+  - name: GOOGLE_CLIENT_ID
+    value: 28211865907-hj9m2dgalpc1ojv3qmeepms8al7d1rns.apps.googleusercontent.com
+  - name: GOOGLE_REDIRECT_URI
+    value: https://riverrise.net/api/auth/oauth/callback
+  - name: DISCORD_CLIENT_ID
+    value: "1519275200296779846"
+  - name: DISCORD_REDIRECT_URI
+    value: https://riverrise.net/api/auth/oauth/callback
+  - name: DISCORD_GUILD_ID
+    value: "1527076605694967919"
+  - name: TELEGRAM_CLIENT_ID
+    value: "8607802723"
+  - name: TELEGRAM_SOCIAL_CHAT_ID
+    value: "-1003896688679"
+  - name: STEAM_REDIRECT_URI
+    value: https://riverrise.net/api/auth/oauth/callback
+  - name: MAILGUN_URL
+    value: https://api.eu.mailgun.net
+  - name: MAILGUN_ENABLED
+    value: "true"
+  - name: MAILGUN_DOMAIN
+    value: riverrise.net
+  - name: SMS_ENABLED
+    value: "false"
+  - name: ZXPROCESSING_ENABLED
+    value: "true"
+  - name: ZXPROCESSING_API_URL
+    value: https://app.0xprocessing.com
+  - name: ZXPROCESSING_MERCHANT_ID
+    value: 0xMR2166677
+  - name: ZXPROCESSING_SANDBOX_ENABLED
+    value: "true"
+  - name: RANK_JOBS_ENABLED
+    value: "true"
+  - name: RANK_WEEKLY_OFFER_CRON
+    value: "0 0 * * 1"
+  - name: RANK_MONTHLY_OFFER_CRON
+    value: "0 0 1 * *"
+  - name: RANK_CASHBACK_CRON
+    value: "0 0 * * 4"
+  - name: RANK_OFFER_EXPIRATION_CRON
+    value: "*/15 * * * *"
+  - name: RANK_OUTBOX_CRON
+    value: "*/5 * * * *"
+  - name: RANK_RECONCILIATION_CRON
+    value: "30 3 * * *"
+  - name: RANK_MONITORING_CRON
+    value: "0 * * * *"
+  - name: KYC_ENABLED
+    value: "true"
+  - name: VERIFF_BASE_URL
+    value: https://stationapi.veriff.com
+  - name: VERIFF_CALLBACK_URL
+    value: https://riverrise.net/profile-edit/my-account
+  - name: S3_ENABLED
+    value: "true"
+  - name: S3_REGION
+    value: eu-north-1
+  - name: S3_BUCKET
+    value: riverrise-content-stage
+  - name: S3_PUBLIC_BASE_URL
+    value: https://riverrise-content-stage.s3.eu-north-1.amazonaws.com
+  - name: S3_UPLOAD_URL_TTL_SECONDS
+    value: "300"
+  - name: FREE_MONEY_JOBS_ENABLED
+    value: "true"
+  - name: FREE_MONEY_FRAUD_FAIL_OPEN
+    value: "true"
+  - name: X_OFFICIAL_USER_ID
+    value: "1519255282236416001"
+  - name: X_CLIENT_ID
+    value: dkc5NXZxd3lLNG5ab18wRTFCcFo6MTpjaQ
+  - name: X_ACTIVITY_WEBHOOK_ENABLED
+    value: "true"
+  - name: X_ACTIVITY_WEBHOOK_ID
+    value: "2092023259545935872"
+  - name: X_DM_POLLING_ENABLED
+    value: "false"
+  - name: X_DM_POLL_INTERVAL_MS
+    value: "30000"
+  - name: X_DM_POLL_MAX_RESULTS
+    value: "10"
+  - name: FRAUD_JOBS_ENABLED
+    value: "true"
+  - name: FRAUD_OUTBOX_CRON
+    value: "* * * * *"
+  - name: FRAUD_RETENTION_CRON
+    value: "45 3 * * *"
+
+# Secrets from SealedSecret `api` (environments/prod/secrets/api.sealed.yaml)
 envFrom:
   - secretRef:
       name: api
