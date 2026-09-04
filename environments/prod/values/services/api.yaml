@@ -73,9 +73,9 @@ env:
   - name: PG_DB_MAX_POOL_SIZE
     value: "20"
   - name: POSTGRES_DB
-    value: riverrise
+    value: defaultdb
   - name: POSTGRES_USER
-    value: riverrise
+    value: upadmin
   - name: REDIS_TLS_ENABLED
     value: "false"
   - name: REDIS_ENABLED
