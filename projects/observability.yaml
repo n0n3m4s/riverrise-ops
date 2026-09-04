@@ -15,6 +15,9 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: observability
       server: https://kubernetes.default.svc
+    # kube-prometheus-stack creates scrape Services for CoreDNS/etcd here
+    - namespace: kube-system
+      server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
