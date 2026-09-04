@@ -12,3 +12,6 @@ ipam:
 
 gatewayAPI:
   enabled: true
+
+operator:
+  replicas: 1
