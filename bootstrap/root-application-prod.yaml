@@ -13,7 +13,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:n0n3m4s/riverrise-ops.git
+    repoURL: https://github.com/n0n3m4s/riverrise-ops.git
     targetRevision: main
     path: .
     directory:

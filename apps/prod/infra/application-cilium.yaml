@@ -16,7 +16,7 @@ spec:
         releaseName: cilium
         valueFiles:
           - $values/environments/prod/values/cilium.yaml
-    - repoURL: git@github.com:n0n3m4s/riverrise-ops.git
+    - repoURL: https://github.com/n0n3m4s/riverrise-ops.git
       targetRevision: main
       ref: values
   destination:
