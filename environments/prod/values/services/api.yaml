@@ -201,6 +201,9 @@ httpRoute:
     - name: cilium
       namespace: gateway
       sectionName: web
+    - name: cilium
+      namespace: gateway
+      sectionName: websecure
   routes:
     - name: api-from-front
       hostnames:

@@ -1,4 +1,5 @@
-# Prod Cilium Gateway for riverrise.net (HTTP listener; TLS later).
+# Prod Cilium Gateway for riverrise.net
+# HTTP :80 kept; HTTPS :443 for Cloudflare Full (Strict) via Origin Cert.
 gateway:
   name: cilium
   gatewayClassName: cilium
@@ -9,6 +10,18 @@ gateway:
       allowedRoutes:
         namespaces:
           from: All
+    websecure:
+      port: 443
+      protocol: HTTPS
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: riverrise-net-tls
+            group: ""
 
 lb:
   enabled: false

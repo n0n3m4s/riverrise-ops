@@ -59,6 +59,9 @@ httpRoute:
     - name: cilium
       namespace: gateway
       sectionName: web
+    - name: cilium
+      namespace: gateway
+      sectionName: websecure
   routes:
     - name: frontend
       hostnames:
