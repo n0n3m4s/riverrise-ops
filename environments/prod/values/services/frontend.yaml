@@ -54,7 +54,7 @@ autoscaling:
 
 # Host(riverrise.net) catch-all / — /api перехоплює api-from-front (longest path match).
 httpRoute:
-  enabled: true
+  enabled: false
   parentRefs:
     - name: cilium
       namespace: gateway
