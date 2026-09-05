@@ -3,9 +3,9 @@ fullnameOverride: frontend
 replicaCount: 1
 
 image:
-  repository: ghcr.io/n0n3m4s/frontend
+  repository: ghcr.io/n0n3m4s/riverrise_front_end
   pullPolicy: IfNotPresent
-  tag: latest
+  tag: 7072d41
 
 imagePullSecrets:
   - name: ghcr-pull
